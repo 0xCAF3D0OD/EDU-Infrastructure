@@ -28,7 +28,7 @@ Terraform
 |------|----------------|
 | Terraform | >= 1.1.0 |
 | Azure CLI | any |
-| SSH key | `~/.ssh/azure_ssh_key.pub` |
+| SSH key | `~/.ssh/azure_ssh_key.pub` + `azure_ssh_key.pem` |
 
 Authenticate with Azure before running any command:
 ```bash
@@ -114,7 +114,20 @@ terraform destroy
 ## Known issues
 
 **VM SKU unavailable in the selected region**
-SKU availability varies by region. Change `location` in `variables.tf` or pick a different SKU.
+SKU availability varies by region. If `Standard_D2als_v7` is unavailable, change `location` in `variables.tf` or pick a different SKU. You can check availability with:
+```bash
+az vm list-skus --location "West US 2" --size Standard_D2als --output table
+```
+
+**Gen 1 vs Gen 2 image incompatibility**
+`Standard_D2als_v7` is a Generation 2 VM. The OS image must also be Gen 2. The current configuration uses `22_04-daily-lts-gen2` which is correct. If you change the VM size or image, make sure the hypervisor generation matches — mixing them causes an immediate error on `terraform apply`.
+
+**SSH private key permissions too open**
+If Ansible or SSH refuses the private key with a `bad permissions` warning, the file is readable by others. Fix it once:
+```bash
+chmod 400 ~/.ssh/azure_ssh_key.pem
+```
+This is required — SSH will silently ignore keys with permissions wider than `400`.
 
 **`resource_provider_registrations = "none"` in provider block**
 Prevents permission errors on restricted Azure subscriptions. Do not remove.
