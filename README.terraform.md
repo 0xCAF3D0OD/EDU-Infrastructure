@@ -49,6 +49,21 @@ azure-terraform/
 ├── security.tf    # NSG + inbound rules
 └── outputs.tf     # Exported public/private IPs
 ```
+Reading workflow:
+```
+variables.tf   → configurable settings
+    ↓
+main.tf        → provider + global container
+    ↓
+network.tf     → network (VNet → Subnet → IPs → NICs)
+    ↓
+security.tf    → firewall applied to NICs
+    ↓
+compute.tf     → VMs that consume everything else
+    ↓
+outputs.tf     → values exported after deployment
+```
+
 
 ---
 
