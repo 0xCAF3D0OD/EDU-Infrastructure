@@ -7,6 +7,8 @@
 
 ## Architecture
 
+![global arch](public/azure-org1.svg)
+
 ```
 Your Machine
   ├── terraform apply      → Azure VMs + Networking
