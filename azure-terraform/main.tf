@@ -40,3 +40,11 @@ resource "azurerm_resource_group" "rg" {
   name     = "myTFResourceGroup"
   location = var.location
 }
+
+resource "azurerm_app_service_certificate" "tls_cert" {
+  name                = "app-${var.environment}-cert"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  pfx_blob            = filebase64("certificate.pfx")
+  password            = "terraform"
+}

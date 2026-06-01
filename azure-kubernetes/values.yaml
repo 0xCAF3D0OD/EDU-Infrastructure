@@ -3,6 +3,11 @@
 # =====================
 namespace: dev
 
+cert-manager: #defined by either the name or alias of your dependency in Chart.yaml
+  namespace: security
+  enabled: true
+  installCRDs: false
+
 app:
   name: edu
 
@@ -10,7 +15,10 @@ app:
 # INGRESS
 # =====================
 ingress:
+  certName: letsencrypt-staging
   className: traefik
+  host: xn--alloremplaant-rgb.ch
+  tlsSecretName: alloremp-tls
 
 # =====================
 # DEPLOYMENT NAMES
