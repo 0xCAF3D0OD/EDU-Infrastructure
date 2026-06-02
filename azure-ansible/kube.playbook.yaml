@@ -14,6 +14,18 @@
   serial: 1
   roles:
     - xanmanning.k3s
+  post_tasks:
+    - name: Force k3s service to agent mode
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/system/k3s.service
+        regexp: '^ExecStart=/usr/local/bin/k3s server'
+        line: 'ExecStart=/usr/local/bin/k3s agent --config /etc/rancher/k3s/config.yaml'
+
+    - name: Reload systemd and restart k3s
+      ansible.builtin.systemd:
+        name: k3s
+        daemon_reload: true
+        state: restarted
   tags: [k3s, workers]
 
 - name: Verify K3s cluster
