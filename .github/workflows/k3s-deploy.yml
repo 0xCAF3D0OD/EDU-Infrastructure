@@ -1,0 +1,138 @@
+# ============================================================
+# Workflow: Deploy to K3s
+# ============================================================
+# Ce workflow déclenche automatiquement un redéploiement
+# Kubernetes après que l'image Docker soit construite et pushée
+# vers GHCR. Cela ferme la boucle CI/CD: code → image → déploiement
+# ============================================================
+
+name: Deploy to K3s
+
+# ============================================================
+# DÉCLENCHEMENT
+# ============================================================
+on:
+  # workflow_run: déclenche ce workflow après un autre workflow
+  workflow_run:
+    # Attend que le workflow "Docker" se termine
+    # (c'est lui qui build et push l'image vers GHCR)
+    workflows: ["Docker"]
+    # Déclenche uniquement quand le workflow Docker est terminé
+    types: [completed]
+
+jobs:
+  deploy:
+    # Condition: ne déploie que si le build Docker a réussi
+    # (conclusion == 'success'). Évite de déployer une image cassée.
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    # Ubuntu latest: runner GitHub fourni par Microsoft
+    # C'est une VM éphémère qui exécute ce workflow
+    runs-on: ubuntu-latest
+
+    steps:
+      # ============================================================
+      # ÉTAPE 1: Cloner le repo Infrastructure
+      # ============================================================
+      # Pourquoi: on a besoin du code Ansible et de l'inventaire
+      # pour se connecter à la VM et lancer le déploiement.
+      # Ce workflow tourne sur un runner GitHub (pas ta VM),
+      # donc il faut d'abord télécharger les fichiers Ansible localement.
+      # ============================================================
+      - name: Checkout Infrastructure repo
+        uses: actions/checkout@v4
+        with:
+          # Spécifie le repo Infrastructure
+          # (pas le repo Frontend où le workflow s'exécute)
+          repository: 0xCAF3D0OD/EDU-Infrastructure
+          ref: main
+
+      # ============================================================
+      # ÉTAPE 2: Installer Ansible et ses dépendances
+      # ============================================================
+      # Pourquoi: le runner GitHub n'a pas Ansible par défaut.
+      # Ansible a besoin de paramiko (SSH Python) pour communiquer
+      # avec la VM. Sans cette étape, les commandes ansible-playbook
+      # n'existeraient pas et échoueraient.
+      # ============================================================
+      - name: Install Ansible
+        run: |
+          pip install ansible paramiko
+
+      # ============================================================
+      # ÉTAPE 3: Configurer et lancer Ansible
+      # ============================================================
+      # C'est l'étape principale qui déclenche le redéploiement.
+      # ============================================================
+      - name: Deploy with Ansible
+        env:
+          # ANSIBLE_HOST_KEY_CHECKING=false
+          # Pourquoi: par défaut Ansible refuse de se connecter
+          # à une VM dont la clé SSH n'est pas dans ~/.ssh/known_hosts.
+          # Sur un runner GitHub (première connexion à ta VM),
+          # cette clé n'existe pas. On désactive la vérification
+          # pour éviter une erreur bloquante.
+          # ⚠️ En production, faire un git clone de known_hosts
+          # depuis ton dépôt pour garder un peu de sécurité.
+          ANSIBLE_HOST_KEY_CHECKING: false
+
+          # ANSIBLE_SSH_PRIVATE_KEY
+          # La clé privée stockée dans GitHub Secrets.
+          # On l'expose comme variable d'environnement
+          # (pas directement en ligne de commande, pour éviter
+          # qu'elle apparaisse dans les logs publics).
+          ANSIBLE_SSH_PRIVATE_KEY: ${{ secrets.ANSIBLE_SSH_KEY }}
+
+        run: |
+          # ============================================================
+          # Créer le dossier .ssh s'il n'existe pas
+          # ============================================================
+          # Pourquoi: Ansible a besoin d'écrire la clé SSH dans ce dossier.
+          # Sur le runner GitHub neuf, ce dossier n'existe pas.
+          mkdir -p ~/.ssh
+
+          # ============================================================
+          # Écrire la clé privée dans un fichier
+          # ============================================================
+          # Pourquoi: Ansible ne peut pas utiliser une clé depuis une
+          # variable d'environnement directement. Elle doit être dans
+          # un fichier. Le fichier doit avoir les permissions 600
+          # (lecture/écriture pour le propriétaire seulement).
+          # La clé vient du secret GitHub ANSIBLE_SSH_KEY.
+          echo "$ANSIBLE_SSH_PRIVATE_KEY" > ~/.ssh/azure_ssh_key.pem
+          
+          # ============================================================
+          # Définir les permissions de la clé
+          # ============================================================
+          # Pourquoi: SSH refuse d'utiliser une clé si elle est
+          # lisible par d'autres utilisateurs (risque de sécurité).
+          # 600 = rw------- (seulement le propriétaire peut la lire).
+          chmod 600 ~/.ssh/azure_ssh_key.pem
+
+          # ============================================================
+          # Changer de répertoire vers le dossier Ansible
+          # ============================================================
+          # Pourquoi: le playbook et l'inventaire sont dans
+          # azure-ansible/. Il faut se positionner là pour que
+          # les chemins relatifs fonctionnent.
+          cd azure-ansible
+          
+          # ============================================================
+          # Exécuter le playbook Ansible
+          # ============================================================
+          # Pourquoi: c'est la commande qui déclenche le redéploiement:
+          # - kube.playbook.yaml = le playbook Helm qu'on a écrit
+          # - inventories/home/hosts.yaml = définit les hosts (ta VM)
+          # - --tags "k8s-deploy" = exécute uniquement les étapes
+          #   du déploiement K8s (Helm install), pas K3s install
+          #   (économise du temps, K3s est déjà là).
+          #
+          # Le playbook se connecte en SSH à ta VM (4.155.235.16)
+          # via la clé qu'on vient de créer, puis exécute:
+          # helm upgrade --install educhat ... --namespace dev ...
+          #
+          # Résultat: les pods EduChat redémarrent avec la nouvelle
+          # image Docker qu'on vient de builder.
+          ansible-playbook kube.playbook.yaml \
+            -i inventories/home/hosts.yaml \
+            --tags "k8s-deploy"
