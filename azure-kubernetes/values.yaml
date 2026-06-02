@@ -11,6 +11,9 @@ cert-manager: #defined by either the name or alias of your dependency in Chart.y
 app:
   name: edu
 
+middleware:
+  name: redirect-https
+
 # =====================
 # INGRESS
 # =====================

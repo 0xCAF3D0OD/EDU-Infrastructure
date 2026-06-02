@@ -79,7 +79,7 @@
         src: ../azure-kubernetes/
         dest: /home/adminuser/azure-kubernetes/
         mode: '0644'
-  tags: [helm, install]
+  tags: [helm, helm-install]
 
 - name: Deploy with Helm in VM's
   hosts: k3s_master
@@ -117,11 +117,11 @@
     - name: Install cert-manager CRDs manually
       ansible.builtin.command:
         cmd: >
-          kubectl apply -f 
-          https://github.com/cert-manager/cert-manager/releases/download/v1.14.0/cert-manager.crds.yaml
+          kubectl apply -f
+          https://github.com/cert-manager/cert-manager/releases/download/v1.16.0/cert-manager.crds.yaml
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      tags: [install]
+      tags: [cert-install]
 
     # 3. Déploiement final : Helm va maintenant trouver le namespace "security" déjà prêt !
     - name: Deploy Educhat app
@@ -135,6 +135,6 @@
           --set cert-manager.namespace=security
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      tags: [install]
+      tags: [edu-install]
 
-  tags: [helm, deploy]
+  tags: [helm, k8s-deploy]

@@ -6,6 +6,9 @@ metadata:
   annotations:
     # add an annotation indicating the issuer to use.
     cert-manager.io/cluster-issuer: "{{ .Values.ingress.certName }}"
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    # {namespace}-{nom-du-middleware}@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.namespace}}-{{ .Values.middleware.name }}@kubernetescrd
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   tls:
