@@ -85,16 +85,16 @@
   hosts: k3s_master
   become: true
   tasks:
-    # 1. On crée le namespace pour l'application principale
-    - name: Create dev namespace
-      ansible.builtin.command:
-        cmd: kubectl create namespace dev
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      failed_when: false
-      changed_when: false
-      tags: [namespace]
-
+#    # 1. On crée le namespace pour l'application principale
+#    - name: Create dev namespace
+#      ansible.builtin.command:
+#        cmd: kubectl create namespace dev
+#      environment:
+#        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+#      failed_when: false
+#      changed_when: false
+#      tags: [namespace]
+#
     # 2. AJOUT : On crée le namespace exigé par la doc cert-manager
     - name: Create security namespace for cert-manager
       ansible.builtin.command:

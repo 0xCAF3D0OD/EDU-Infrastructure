@@ -99,7 +99,9 @@ jobs:
           # un fichier. Le fichier doit avoir les permissions 600
           # (lecture/écriture pour le propriétaire seulement).
           # La clé vient du secret GitHub ANSIBLE_SSH_KEY.
-          echo "$ANSIBLE_SSH_PRIVATE_KEY" > ~/.ssh/azure_ssh_key.pem
+          cat << 'EOF' > ~/.ssh/azure_ssh_key.pem
+          ${{ secrets.ANSIBLE_SSH_KEY }}
+          EOF
           
           # ============================================================
           # Définir les permissions de la clé
