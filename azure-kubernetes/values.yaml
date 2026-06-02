@@ -47,7 +47,7 @@ services:
 # =====================
 ports:
   backend: 8000
-  frontend: 5173
+  frontend: 80
   postgres: 5432
   redis: 6379
   ingress: 80

@@ -137,4 +137,4 @@
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
       tags: [edu-install]
 
-  tags: [helm, k8s-deploy]
+  tags: [helm, k3s-deploy]
