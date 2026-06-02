@@ -1,6 +1,6 @@
 # Local .terraform directories
 .terraform/
-
+README.troubleshots.md
 values.secret.yaml
 
 
