@@ -24,7 +24,7 @@ variable "client_id" {
 # Rotate regularly in production environments.
 variable "client_secret" {
   description = "Azure service principal client secret"
-  type        = string
+  sensitive = true  # Permet de masquer le secret dans les logs de la console
 }
 
 # Azure tenant ID — the directory ID of your Azure AD tenant.

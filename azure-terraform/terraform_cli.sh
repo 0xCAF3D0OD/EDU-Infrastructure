@@ -48,7 +48,7 @@ terraform validate || { echo "ERROR  validate "; exit 1; }
 
 echo "terraform plan"
 # Terraform plan
-terraform plan || { echo "ERROR  plan "; exit 1; }
+terraform plan -var-file="/Users/dino/Documents/AZURE/azure_client" || { echo "ERROR  plan "; exit 1; }
 
 echo "-----------------------------"
 echo "ALL step has been succeed ✅"
