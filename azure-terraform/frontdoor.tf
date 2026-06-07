@@ -17,9 +17,9 @@ resource "azurerm_cdn_frontdoor_profile" "my_front_door" {
 }
 
 resource "azurerm_cdn_frontdoor_custom_domain" "educhat_domain" {
-  name                     = "alloremplacant-ch"
+  name                     = "www-alloremplacant-ch"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.my_front_door.id
-  host_name                = "xn--alloremplaant-rgb.ch"   # punycode (ç)
+  host_name                = "www.alloremplacant.ch"   # ASCII + www (apex impossible en CNAME)
 
   tls {
     certificate_type    = "ManagedCertificate"   # cert public de confiance, géré par Front Door
@@ -54,13 +54,13 @@ resource "azurerm_cdn_frontdoor_origin" "educhat_service_origin" {
   name                          = local.front_door_origin_name
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.my_origin_group.id
 
-  enabled                        = true
-  host_name          = "origin.xn--alloremplaant-rgb.ch" # ← résout vers l'IP publique de la VM
-  origin_host_header = "origin.xn--alloremplaant-rgb.ch" # ← DOIT matcher le cert cert-manager
-  http_port                      = 80
-  https_port                     = 443
-  priority                       = 1
-  weight                         = 1000
+  enabled            = true
+  host_name          = "origin.alloremplacant.ch"   # ASCII → A record vers la VM
+  origin_host_header = "origin.alloremplacant.ch"   # ASCII → doit matcher le cert cert-manager
+  http_port          = 80
+  https_port         = 443
+  priority           = 1
+  weight             = 1000
 
   certificate_name_check_enabled = true
 }
