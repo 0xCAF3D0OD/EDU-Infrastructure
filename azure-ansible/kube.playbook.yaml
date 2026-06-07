@@ -36,7 +36,7 @@
     # Attends maximum 5 minutes. Si après 5 minutes ce n'est pas le cas, échoue."
     - name: Wait for all nodes to be ready
       ansible.builtin.shell: |
-        kubectl get nodes --no-headers | grep "NotReady" | wc -l
+        k3s kubectl get nodes --no-headers | grep "NotReady" | wc -l
       # Stockez le résultat de la commande: "kubectl ..." dans une variable not_ready_nodes.
       # On peut ensuite lire not_ready_nodes.stdout afin de voir ce que la commande a renvoyé.
       register: not_ready_nodes
@@ -53,7 +53,7 @@
       changed_when: false
 
     - name: Display cluster status
-      ansible.builtin.command: kubectl get nodes -o wide
+      ansible.builtin.command: k3s kubectl get nodes -o wide
       register: cluster_status
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
@@ -110,7 +110,7 @@
     # 2. AJOUT : On crée le namespace exigé par la doc cert-manager
     - name: Create security namespace for cert-manager
       ansible.builtin.command:
-        cmd: kubectl create namespace security
+        cmd: k3s kubectl create namespace security
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
       failed_when: false
@@ -129,7 +129,7 @@
     - name: Install cert-manager CRDs manually
       ansible.builtin.command:
         cmd: >
-          kubectl apply -f
+          k3s kubectl apply -f
           https://github.com/cert-manager/cert-manager/releases/download/v1.16.0/cert-manager.crds.yaml
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
