@@ -20,7 +20,7 @@ middleware:
 ingress:
   certName: letsencrypt-prod-account-key #letsencrypt-staging
   className: traefik
-  host: xn--alloremplaant-rgb.ch
+  host: origin.alloremplaçant.ch
   tlsSecretName: alloremp-tls
 
 # =====================

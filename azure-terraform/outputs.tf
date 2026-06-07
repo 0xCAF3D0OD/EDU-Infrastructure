@@ -47,3 +47,7 @@ output "nsg_id" {
 output "frontDoorEndpointHostName" {
   value = azurerm_cdn_frontdoor_endpoint.my_endpoint.host_name
 }
+
+output "frontdoor_custom_domain_validation_token" {
+  value = azurerm_cdn_frontdoor_custom_domain.educhat_domain.validation_token
+}

@@ -120,12 +120,6 @@ variable "app_service_plan_sku_name" {
   }
 }
 
-variable "app_service_plan_capacity" {
-  type        = number
-  description = "The number of Workers (instances) to be allocated."
-  default     = 1
-}
-
 variable "front_door_sku_name" {
   type        = string
   description = "The SKU for the Front Door profile. Possible values include: Standard_AzureFrontDoor, Premium_AzureFrontDoor"

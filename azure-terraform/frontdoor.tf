@@ -55,8 +55,8 @@ resource "azurerm_cdn_frontdoor_origin" "educhat_service_origin" {
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.my_origin_group.id
 
   enabled                        = true
-  host_name          = "origin.alloremplacant.ch"   # ← résout vers l'IP publique de la VM
-  origin_host_header = "origin.alloremplacant.ch"   # ← DOIT matcher le cert cert-manager
+  host_name          = "origin.xn--alloremplaant-rgb.ch" # ← résout vers l'IP publique de la VM
+  origin_host_header = "origin.xn--alloremplaant-rgb.ch" # ← DOIT matcher le cert cert-manager
   http_port                      = 80
   https_port                     = 443
   priority                       = 1
@@ -70,6 +70,8 @@ resource "azurerm_cdn_frontdoor_route" "my_route" {
   cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.my_endpoint.id
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.my_origin_group.id
   cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.educhat_service_origin.id]
+
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.educhat_domain.id]
 
   supported_protocols    = ["Http", "Https"]
   patterns_to_match      = ["/*"]
