@@ -16,7 +16,6 @@ resource "azurerm_service_plan" "app_service_plan" {
   os_type      = "Windows"
   worker_count = var.app_service_plan_capacity
 }
-
 resource "azurerm_windows_web_app" "app" {
   name                = local.app_name
   location            = azurerm_resource_group.rg.location
@@ -44,3 +43,4 @@ resource "azurerm_windows_web_app" "app" {
     }
   }
 }
+
