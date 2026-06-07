@@ -4,22 +4,22 @@ all:
     home:
       children:
         k3s:
+          vars:
+            k3s_registration_address: "10.0.2.4"
           children:
             k3s_master:
               hosts:
                 vm-dev-1:
                   ansible_host: 20.98.92.60
+                  k3s_control_node: true
                   k3s_cluster_init: true
-                  k3s_kubelet_args:
-                    - "max-pods=110"
+                  k3s_kubelet_args: ["max-pods=110"]
             k3s_workers:
               hosts:
                 vm-dev-2:
-                  k3s_control_node: false
                   ansible_host: 20.115.158.235
-                  k3s_registration_address: "10.0.2.4"
-                  k3s_kubelet_args:
-                    - "max-pods=45"
+                  k3s_control_node: false
+                  k3s_kubelet_args: ["max-pods=45"]
       vars:
         ansible_become: yes
         ansible_port: 22

@@ -1,32 +1,12 @@
 # https://blog.stephane-robert.info/docs/infra-as-code/gestion-de-configuration/ansible/premiers-pas/premier-playbook/#:~:text=Les%20cl%C3%A9s%20essentielles%20d%27un%20play%20%3A
 # https://fouts.dev/posts/deploying-k3s-with-ansible-a-complete-tutorial/
 ---
-- name: Install K3s on master node
-  hosts: k3s_master
+- name: Deploy K3s cluster (master + workers ensemble)
+  hosts: k3s
   become: true
   roles:
     - xanmanning.k3s
-  tags: [k3s, master]
-
-- name: Install K3s on worker nodes
-  hosts: k3s_workers
-  become: true
-  serial: 1
-  roles:
-    - xanmanning.k3s
-  post_tasks:
-    - name: Force k3s service to agent mode
-      ansible.builtin.lineinfile:
-        path: /etc/systemd/system/k3s.service
-        regexp: '^ExecStart=/usr/local/bin/k3s server'
-        line: 'ExecStart=/usr/local/bin/k3s agent --config /etc/rancher/k3s/config.yaml'
-
-    - name: Reload systemd and restart k3s
-      ansible.builtin.systemd:
-        name: k3s
-        daemon_reload: true
-        state: restarted
-  tags: [k3s, workers]
+  tags: [k3s]
 
 - name: Verify K3s cluster
   hosts: k3s_master
