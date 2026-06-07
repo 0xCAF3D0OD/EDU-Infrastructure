@@ -43,3 +43,7 @@ output "nsg_id" {
   description = "ID of the Network Security Group"
   value       = azurerm_network_security_group.nsg.id
 }
+
+output "frontDoorEndpointHostName" {
+  value = azurerm_cdn_frontdoor_endpoint.my_endpoint.host_name
+}

@@ -1,32 +1,5 @@
-# ============================================================
-# Provider configuration
-# ============================================================
-
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      # Pin to a specific version to avoid unexpected breaking changes
-      # on future provider releases. Upgrade intentionally via:
-      #   terraform init -upgrade
-      version = "=4.1.0"
-    }
-  }
-
-  # Minimum Terraform CLI version required to run this configuration.
-  required_version = ">= 1.1.0"
-}
-
-provider "azurerm" {
-  subscription_id = var.subscription_id
-
-  # Disables automatic registration of Azure resource providers.
-  # Required on restricted subscriptions where the service principal
-  # does not have permission to register providers globally.
-  # Remove only if you have Contributor access on the subscription.
-  resource_provider_registrations = "none"
-
-  features {}
+resource "random_pet" "rg_name" {
+  prefix = var.resource_group_name_prefix
 }
 
 # ============================================================
@@ -37,14 +10,74 @@ provider "azurerm" {
 # Every Azure resource must belong to a resource group.
 # Deleting this resource group destroys all resources inside it.
 resource "azurerm_resource_group" "rg" {
-  name     = "myTFResourceGroup"
-  location = var.location
+  name     = random_pet.rg_name.id
+  location = var.resource_group_location
 }
 
-resource "azurerm_app_service_certificate" "tls_cert" {
-  name                = "app-${var.environment}-cert"
+resource "random_id" "front_door_endpoint_name" {
+  byte_length = 8
+}
+
+locals {
+  front_door_profile_name      = "EduchatFrontDoor"
+  front_door_endpoint_name     = "afd-${lower(random_id.front_door_endpoint_name.hex)}"
+  front_door_origin_group_name = "MyOriginGroup"
+  front_door_origin_name       = "EduchatServiceOrigin"
+  front_door_route_name        = "MyRoute"
+}
+
+resource "azurerm_cdn_frontdoor_profile" "my_front_door" {
+  name                = local.front_door_profile_name
   resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  pfx_blob            = filebase64("certificate.pfx")
-  password            = "terraform"
+  sku_name            = var.front_door_sku_name
+}
+
+resource "azurerm_cdn_frontdoor_endpoint" "my_endpoint" {
+  name                     = local.front_door_endpoint_name
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.my_front_door.id
+}
+
+resource "azurerm_cdn_frontdoor_origin_group" "my_origin_group" {
+  name                     = local.front_door_origin_group_name
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.my_front_door.id
+  session_affinity_enabled = true
+
+  load_balancing {
+    sample_size                 = 4
+    successful_samples_required = 3
+  }
+
+  health_probe {
+    path                = "/"
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = 100
+  }
+}
+
+resource "azurerm_cdn_frontdoor_origin" "educhat_service_origin" {
+  name                          = local.front_door_origin_name
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.my_origin_group.id
+
+  enabled                        = true
+  host_name                      = azurerm_windows_web_app.app.default_hostname
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = azurerm_windows_web_app.app.default_hostname
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+resource "azurerm_cdn_frontdoor_route" "my_route" {
+  name                          = local.front_door_route_name
+  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.my_endpoint.id
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.my_origin_group.id
+  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.educhat_service_origin.id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  link_to_default_domain = true
+  https_redirect_enabled = true
 }
