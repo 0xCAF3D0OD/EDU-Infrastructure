@@ -7,7 +7,7 @@
 
 ## Architecture
 
-![global arch](public/azure-org1.svg)
+![global arch](public/azure-org2.svg)
 
 ```
 Your Machine
