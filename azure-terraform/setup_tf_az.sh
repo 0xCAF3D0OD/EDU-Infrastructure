@@ -104,7 +104,6 @@ echo " - tenant_id  = $AZ_TNT_ID"
 echo ""
 echo "File: $TFVARS"
 
-cd "$TF_FLD" || { echo "ERROR cd"; exit 1; }
 if [ ! -f "main.tf" ]; then
   echo "Creating main.tf ..."
   cat > "main.tf" << EOF
@@ -145,7 +144,7 @@ terraform validate || { echo "ERROR  validate "; exit 1; }
 
 echo "terraform plan"
 # Terraform plan
-terraform plan -var-file="/Users/dino/Documents/AZURE/azure_client"|| { echo "ERROR  plan "; exit 1; }
+terraform plan -var-file="/Users/dino/Documents/AZURE/azure_client" || { echo "ERROR  plan "; exit 1; }
 
 echo "-----------------------------"
 echo "ALL step has been succeed ✅"
@@ -155,6 +154,6 @@ pip3 install InquirerPy
 python3 validate.py
 
 if [ $? -eq 0 ]; then
-  terraform apply
+  terraform apply -var-file="/Users/dino/Documents/AZURE/azure_client"
 fi
 
