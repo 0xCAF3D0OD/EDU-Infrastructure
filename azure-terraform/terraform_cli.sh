@@ -1,13 +1,5 @@
 #!/bin/bash
-TF_FLD="terraform-azure"
 
-if [ ! -d "$TF_FLD" ]; then
-  echo "creating terraform folder [$TF_FLD] ..."
-  mkdir "$TF_FLD" || { echo "ERROR mkdir "; exit 1; }
-fi
-
-echo "Enter $TF_FLD ..."
-cd "$TF_FLD" || { echo "ERROR cd"; exit 1; }
 if [ ! -f "main.tf" ]; then
   echo "Creating main.tf ..."
   cat > "main.tf" << EOF
@@ -58,5 +50,5 @@ pip3 install InquirerPy
 python3 validate.py
 
 if [ $? -eq 0 ]; then
-  terraform apply
+  terraform apply -var-file="/Users/dino/Documents/AZURE/azure_client" || { echo "ERROR  plan "; exit 1; }
 fi

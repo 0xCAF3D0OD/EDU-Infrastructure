@@ -24,7 +24,7 @@ variable "client_id" {
 # Rotate regularly in production environments.
 variable "client_secret" {
   description = "Azure service principal client secret"
-  sensitive = true  # Permet de masquer le secret dans les logs de la console
+  sensitive   = true # Permet de masquer le secret dans les logs de la console
 }
 
 # Azure tenant ID — the directory ID of your Azure AD tenant.
@@ -40,8 +40,8 @@ variable "tenant_id" {
 
 variable "app_name" {
   description = "Describe the name of the application"
-  type = string
-  default = "educhat"
+  type        = string
+  default     = "educhat"
 }
 # Azure region where all resources will be deployed.
 # Changing this after initial deployment requires a full

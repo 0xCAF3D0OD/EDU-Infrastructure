@@ -104,14 +104,6 @@ echo " - tenant_id  = $AZ_TNT_ID"
 echo ""
 echo "File: $TFVARS"
 
-TF_FLD="terraform-azure"
-
-if [ ! -d "$TF_FLD" ]; then
-  echo "creating terraform folder [$TF_FLD] ..."
-  mkdir "$TF_FLD" || { echo "ERROR mkdir "; exit 1; }
-fi
-
-echo "Enter $TF_FLD ..."
 cd "$TF_FLD" || { echo "ERROR cd"; exit 1; }
 if [ ! -f "main.tf" ]; then
   echo "Creating main.tf ..."
@@ -153,7 +145,7 @@ terraform validate || { echo "ERROR  validate "; exit 1; }
 
 echo "terraform plan"
 # Terraform plan
-terraform plan -var-file="/Users/dino/Documents/AZURE/azure_client.txt"|| { echo "ERROR  plan "; exit 1; }
+terraform plan -var-file="/Users/dino/Documents/AZURE/azure_client"|| { echo "ERROR  plan "; exit 1; }
 
 echo "-----------------------------"
 echo "ALL step has been succeed ✅"

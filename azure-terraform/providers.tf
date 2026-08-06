@@ -5,7 +5,7 @@
 terraform {
   required_providers {
     azurerm = {
-      source  = "hashicorp/azurerm"
+      source = "hashicorp/azurerm"
       # Pin to a specific version to avoid unexpected breaking changes
       # on future provider releases. Upgrade intentionally via:
       #   terraform init -upgrade
