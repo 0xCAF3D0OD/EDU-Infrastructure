@@ -10,14 +10,14 @@ all:
             k3s_master:
               hosts:
                 vm-dev-1:
-                  ansible_host: 20.98.92.60
+                  ansible_host: 40.64.124.169
                   k3s_control_node: true
                   k3s_cluster_init: true
                   k3s_kubelet_args: ["max-pods=110"]
             k3s_workers:
               hosts:
                 vm-dev-2:
-                  ansible_host: 20.115.158.235
+                  ansible_host: 20.125.60.249
                   k3s_control_node: false
                   k3s_kubelet_args: ["max-pods=45"]
       vars:
